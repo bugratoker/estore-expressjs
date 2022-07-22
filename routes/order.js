@@ -15,7 +15,7 @@ router.post("/",verifyTokenAndAuth,async(req,res)=>{
         res.status(500).json(err)
     }
 })
-//GET BY USER ID
+//GET BY USERID
 router.get("/:userId",verifyTokenAndAuth,async(req,res)=>{
 
     try{
