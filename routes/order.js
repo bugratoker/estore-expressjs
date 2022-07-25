@@ -1,4 +1,4 @@
-const router = require('express').Router();
+const   router = require('express').Router();
 const Order = require('../models/Order');
 const { verifyTokenAndAuth,verifyTokenAndAdmin } = require('./verifyToken');
 
@@ -15,6 +15,41 @@ router.post("/",verifyTokenAndAuth,async(req,res)=>{
         res.status(500).json(err)
     }
 })
+
+//GET MONTHLY INCOME
+router.get("/income",verifyTokenAndAdmin,async(req,res)=>{
+    console.log("asdsa")
+    const date = new Date();
+    const lastMonth = new Date(date.setMonth(date.getMonth()-1)) // june
+    const previousMonth = new Date(new Date().setMonth(lastMonth.getMonth()-1)) //may
+    
+
+    
+    try{
+
+        
+        const income = await Order.aggregate([
+            
+            {$match:{createdAt:{$gte:previousMonth}}},
+            {$project:{month:{$month:"$createdAt"},sales:("$amount")}},
+           
+            {$group:{_id:"$month",total:{$sum:"$sales"}}}
+             // Each `_id` must be unique, so if there are multiple
+            // months with the same name, sum = sum + sales sql = group by [_id]
+            // { $match: { "continent": { $in: ["North America", "Asia"] } } }
+            //{ $sort: { "population": -1 } } -> descending order
+        ]);
+        res.status(200).json(income)
+
+    }catch(err){
+        res.status(500).json(err)
+
+    }
+
+
+})
+
+//get - /: olan get -"/income"dan altta olmalı yoksa onu anlar
 //GET BY USERID
 router.get("/:userId",verifyTokenAndAuth,async(req,res)=>{
 
@@ -26,6 +61,7 @@ router.get("/:userId",verifyTokenAndAuth,async(req,res)=>{
     }
 
 })
+
 //GET ALL
 router.get("/",verifyTokenAndAdmin,async(req,res)=>{
 
